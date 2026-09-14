@@ -1,0 +1,6 @@
+{
+  "name": "AI Image To Text Scanner",
+  "description": "Advanced OCR productivity application to scan images, extract text, and translate.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
