@@ -45,7 +45,8 @@ class MainActivity : ComponentActivity() {
                                 viewModel = viewModel,
                                 onNavigateToCamera = { navController.navigate("camera") },
                                 onNavigateToResult = { navController.navigate("result") },
-                                onNavigateToChat = { navController.navigate("chat") }
+                                onNavigateToChat = { navController.navigate("chat") },
+                                onNavigateToAbout = { navController.navigate("about") }
                             )
                         }
                         composable("camera") {
@@ -77,6 +78,11 @@ class MainActivity : ComponentActivity() {
                             }
                             ChatScreen(
                                 viewModel = chatViewModel,
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable("about") {
+                            com.example.ui.screens.AboutScreen(
                                 onNavigateBack = { navController.popBackStack() }
                             )
                         }

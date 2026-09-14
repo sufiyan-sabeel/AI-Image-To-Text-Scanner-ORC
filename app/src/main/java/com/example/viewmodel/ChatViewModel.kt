@@ -88,7 +88,7 @@ class ChatViewModel : ViewModel() {
                 // 5. Update UI (replace loading message with actual response)
                 val updatedMessages = _messages.value.toMutableList()
                 if (updatedMessages.isNotEmpty() && updatedMessages.last().isLoading) {
-                    updatedMessages.removeLast()
+                    updatedMessages.removeAt(updatedMessages.size - 1)
                 }
                 updatedMessages.add(ChatMessage(responseText, isUser = false, isLoading = false))
                 _messages.value = updatedMessages
@@ -97,7 +97,7 @@ class ChatViewModel : ViewModel() {
                 Log.e("ChatViewModel", "Chat API Error", e)
                 val updatedMessages = _messages.value.toMutableList()
                 if (updatedMessages.isNotEmpty() && updatedMessages.last().isLoading) {
-                    updatedMessages.removeLast()
+                    updatedMessages.removeAt(updatedMessages.size - 1)
                 }
                 updatedMessages.add(ChatMessage("Sorry, there was an error processing your request. Check your connection.", isUser = false))
                 _messages.value = updatedMessages

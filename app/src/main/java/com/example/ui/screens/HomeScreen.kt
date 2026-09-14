@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -34,7 +35,8 @@ fun HomeScreen(
     viewModel: ScannerViewModel,
     onNavigateToCamera: () -> Unit,
     onNavigateToResult: () -> Unit,
-    onNavigateToChat: () -> Unit
+    onNavigateToChat: () -> Unit,
+    onNavigateToAbout: () -> Unit
 ) {
     val documents by viewModel.documents.collectAsState()
     val context = LocalContext.current
@@ -61,7 +63,7 @@ fun HomeScreen(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onNavigateToChat,
-                icon = { Icon(Icons.Default.Chat, contentDescription = "AI Chat") },
+                icon = { Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = "AI Chat") },
                 text = { Text("AI Assistant", fontWeight = FontWeight.Bold) },
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -85,7 +87,7 @@ fun HomeScreen(
                     Surface(
                         shape = CircleShape,
                         color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f),
-                        modifier = Modifier.padding(end = 16.dp)
+                        modifier = Modifier.padding(end = 8.dp)
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -105,6 +107,13 @@ fun HomeScreen(
                                 color = MaterialTheme.colorScheme.tertiary
                             )
                         }
+                    }
+                    IconButton(onClick = onNavigateToAbout) {
+                        Icon(
+                            Icons.Default.Info,
+                            contentDescription = "About",
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
