@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material.icons.filled.FlashOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -65,6 +66,9 @@ fun CameraScreen(
     if (hasCameraPermission) {
         val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
         var imageCapture by remember { mutableStateOf<ImageCapture?>(null) }
+        var cameraControl by remember { mutableStateOf<CameraControl?>(null) }
+        var flashEnabled by remember { mutableStateOf(false) }
+        var isCapturing by remember { mutableStateOf(false) }
         val isProcessing by viewModel.isProcessing.collectAsState()
 
         Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
@@ -84,9 +88,10 @@ fun CameraScreen(
 
                         try {
                             cameraProvider.unbindAll()
-                            cameraProvider.bindToLifecycle(
+                            val camera = cameraProvider.bindToLifecycle(
                                 lifecycleOwner, cameraSelector, preview, imageCapture
                             )
+                            cameraControl = camera.cameraControl
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
@@ -161,13 +166,16 @@ fun CameraScreen(
                 IconButton(onClick = onNavigateBack) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
                 }
-                IconButton(onClick = { /* TODO flash */ }) {
-                    Icon(Icons.Default.FlashOn, contentDescription = "Flash", tint = Color.White)
+                IconButton(onClick = { 
+                    flashEnabled = !flashEnabled
+                    cameraControl?.enableTorch(flashEnabled)
+                }) {
+                    Icon(if (flashEnabled) Icons.Default.FlashOff else Icons.Default.FlashOn, contentDescription = "Flash", tint = Color.White)
                 }
             }
 
             // Capture Button
-            if (isProcessing) {
+            if (isProcessing || isCapturing) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 64.dp),
                     color = MaterialTheme.colorScheme.primary
@@ -184,15 +192,19 @@ fun CameraScreen(
                 ) {
                     Button(
                         onClick = {
+                            isCapturing = true
                             takePhoto(
                                 context = context,
                                 imageCapture = imageCapture,
                                 executor = cameraExecutor,
                                 onImageCaptured = { bitmap ->
+                                    isCapturing = false
                                     viewModel.processImage(bitmap)
                                     onCaptureSuccess()
                                 },
-                                onError = {}
+                                onError = {
+                                    isCapturing = false
+                                }
                             )
                         },
                         modifier = Modifier.fillMaxSize(),
@@ -225,18 +237,14 @@ private fun takePhoto(
         executor,
         object : ImageCapture.OnImageCapturedCallback() {
             override fun onCaptureSuccess(imageProxy: ImageProxy) {
-                val buffer = imageProxy.planes[0].buffer
-                val bytes = ByteArray(buffer.capacity())
-                buffer.get(bytes)
-                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, null)
-                val matrix = Matrix().apply { postRotate(imageProxy.imageInfo.rotationDegrees.toFloat()) }
-                val rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+                val bitmap = imageProxy.toBitmap()
                 
                 ContextCompat.getMainExecutor(context).execute {
-                    onImageCaptured(rotatedBitmap)
+                    onImageCaptured(bitmap)
                 }
                 imageProxy.close()
             }
+
             override fun onError(exception: ImageCaptureException) {
                 ContextCompat.getMainExecutor(context).execute {
                     onError(exception)

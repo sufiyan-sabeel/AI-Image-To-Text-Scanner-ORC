@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,7 +37,9 @@ fun HomeScreen(
     onNavigateToCamera: () -> Unit,
     onNavigateToResult: () -> Unit,
     onNavigateToChat: () -> Unit,
-    onNavigateToAbout: () -> Unit
+    onNavigateToAbout: () -> Unit,
+    onNavigateToSlides: () -> Unit,
+    onNavigateToTranslate: () -> Unit = {}
 ) {
     val documents by viewModel.documents.collectAsState()
     val context = LocalContext.current
@@ -73,13 +76,14 @@ fun HomeScreen(
             TopAppBar(
                 title = { 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.DocumentScanner,
-                            contentDescription = "Logo",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(28.dp)
+                        androidx.compose.foundation.Image(
+                            painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.scanner_app_logo_1789471088015),
+                            contentDescription = "App Logo",
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(RoundedCornerShape(8.dp))
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text("AI Scanner OCR", fontWeight = FontWeight.Bold, fontSize = 20.sp)
                     }
                 },
@@ -203,6 +207,45 @@ fun HomeScreen(
                 }
             }
             item {
+                // Target Language Selector
+                val targetLang by viewModel.targetLanguage.collectAsState()
+                var expanded by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+                
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable { expanded = true }
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text("Auto-Translate Target", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(viewModel.supportedLanguages[targetLang] ?: "Unknown", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                    }
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = "Select Language")
+                    
+                    DropdownMenu(
+                        expanded = expanded, 
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        viewModel.supportedLanguages.forEach { (code, name) ->
+                            DropdownMenuItem(
+                                text = { Text(name, fontWeight = if (code == targetLang) FontWeight.Bold else FontWeight.Normal) },
+                                onClick = {
+                                    viewModel.setTargetLanguage(code)
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            item {
                 // Quick Actions Grid
                 Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
                     Row(
@@ -252,13 +295,47 @@ fun HomeScreen(
                             modifier = Modifier.weight(1f)
                         )
                         ActionCard(
+                            icon = Icons.Default.Translate,
+                            title = "AI Translator",
+                            subtitle = "Indian & Global",
+                            badge = "50+ LANG",
+                            iconBgColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                            iconColor = MaterialTheme.colorScheme.primary,
+                            onClick = onNavigateToTranslate,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        ActionCard(
                             icon = Icons.Default.Draw,
                             title = "Handwriting",
-                            subtitle = "Cursive & notes",
+                            subtitle = "Cursive notes",
                             badge = "AI OCR",
                             iconBgColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f),
                             iconColor = MaterialTheme.colorScheme.tertiary,
-                            onClick = onNavigateToCamera, // Uses camera for handwriting too
+                            onClick = onNavigateToCamera,
+                            modifier = Modifier.weight(1f)
+                        )
+                        ActionCard(
+                            icon = Icons.Default.Slideshow,
+                            title = "AI Slide Deck",
+                            subtitle = "Executive slides",
+                            badge = "PRESENT",
+                            iconBgColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
+                            iconColor = MaterialTheme.colorScheme.secondary,
+                            onClick = {
+                                if (viewModel.currentExtractedText.value.isNotBlank()) {
+                                    viewModel.generateSlidesFromText(viewModel.currentExtractedText.value) {
+                                        onNavigateToSlides()
+                                    }
+                                } else {
+                                    onNavigateToSlides()
+                                }
+                            },
                             modifier = Modifier.weight(1f)
                         )
                     }

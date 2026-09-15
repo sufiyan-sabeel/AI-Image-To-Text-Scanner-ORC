@@ -19,6 +19,8 @@ import com.example.ui.screens.CameraScreen
 import com.example.ui.screens.ChatScreen
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.ResultScreen
+import com.example.ui.screens.SlideDeckScreen
+import com.example.ui.screens.SplashScreen
 import com.example.ui.screens.TranslateScreen
 import com.example.ui.theme.MyApplicationTheme
 import com.example.viewmodel.ChatViewModel
@@ -37,16 +39,27 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     NavHost(
                         navController = navController,
-                        startDestination = "home",
+                        startDestination = "splash",
                         modifier = Modifier.padding(innerPadding)
                     ) {
+                        composable("splash") {
+                            SplashScreen(
+                                onSplashFinished = {
+                                    navController.navigate("home") {
+                                        popUpTo("splash") { inclusive = true }
+                                    }
+                                }
+                            )
+                        }
                         composable("home") {
                             HomeScreen(
                                 viewModel = viewModel,
                                 onNavigateToCamera = { navController.navigate("camera") },
                                 onNavigateToResult = { navController.navigate("result") },
                                 onNavigateToChat = { navController.navigate("chat") },
-                                onNavigateToAbout = { navController.navigate("about") }
+                                onNavigateToAbout = { navController.navigate("about") },
+                                onNavigateToSlides = { navController.navigate("slides") },
+                                onNavigateToTranslate = { navController.navigate("translate") }
                             )
                         }
                         composable("camera") {
@@ -62,7 +75,14 @@ class MainActivity : ComponentActivity() {
                             ResultScreen(
                                 viewModel = viewModel,
                                 onNavigateBack = { navController.popBackStack() },
-                                onNavigateToTranslate = { navController.navigate("translate") }
+                                onNavigateToTranslate = { navController.navigate("translate") },
+                                onNavigateToSlides = { navController.navigate("slides") }
+                            )
+                        }
+                        composable("slides") {
+                            SlideDeckScreen(
+                                viewModel = viewModel,
+                                onNavigateBack = { navController.popBackStack() }
                             )
                         }
                         composable("translate") {
