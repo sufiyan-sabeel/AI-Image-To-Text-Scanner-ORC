@@ -61,13 +61,19 @@ jobs:
 
     - name: Publish GitHub Release
       if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v1.0.0-b${{ github.run_number }}
+        name: "AI Image To Text Scanner v1.0.0 (Build ${{ github.run_number }})"
+        body: |
+          ### AI Image To Text Scanner
+          Direct APK download with updated custom logo and camera scanning animation.
+          
+          **Download & Install:**
+          Tap `AI-Image-To-Text-Scanner.apk` below to download directly to your phone.
+        files: release-output/AI-Image-To-Text-Scanner.apk
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        TAG_NAME="v1.0-build-${{ github.run_number }}"
-        echo "Publishing release $TAG_NAME..."
-        gh release create "$TAG_NAME" "release-output/AI-Image-To-Text-Scanner.apk" \
-          --title "AI Image To Text Scanner (Build ${{ github.run_number }})" \
-          --notes "AI Image To Text Scanner latest version with custom logo and camera scanning animation overlay." || echo "GitHub release creation finished. APK is also available in Artifacts."
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      continue-on-error: true
 
 
