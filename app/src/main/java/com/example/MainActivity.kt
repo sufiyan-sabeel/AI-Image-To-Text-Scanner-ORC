@@ -23,12 +23,14 @@ import com.example.ui.screens.SlideDeckScreen
 import com.example.ui.screens.SplashScreen
 import com.example.ui.screens.TranslateScreen
 import com.example.ui.theme.MyApplicationTheme
+import com.example.ui.theme.ThemeManager
 import com.example.viewmodel.ChatViewModel
 import com.example.viewmodel.ScannerViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ThemeManager.initialize(this)
         enableEdgeToEdge()
         setContent {
             MyApplicationTheme {
