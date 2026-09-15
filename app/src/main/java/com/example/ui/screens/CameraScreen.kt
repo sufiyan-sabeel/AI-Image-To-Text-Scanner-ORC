@@ -12,6 +12,7 @@ import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -123,6 +124,29 @@ fun CameraScreen(
                     // Bottom Right
                     drawLine(color, androidx.compose.ui.geometry.Offset(size.width, size.height), androidx.compose.ui.geometry.Offset(size.width - cornerLength, size.height), strokeWidth)
                     drawLine(color, androidx.compose.ui.geometry.Offset(size.width, size.height), androidx.compose.ui.geometry.Offset(size.width, size.height - cornerLength), strokeWidth)
+                }
+
+                if (isProcessing) {
+                    val infiniteTransition = rememberInfiniteTransition(label = "scanner")
+                    val offsetY by infiniteTransition.animateFloat(
+                        initialValue = 0f,
+                        targetValue = 1f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(1500, easing = LinearEasing),
+                            repeatMode = RepeatMode.Reverse
+                        ),
+                        label = "scanner_line"
+                    )
+
+                    androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
+                        val y = offsetY * size.height
+                        drawLine(
+                            color = Color(0xFF00E5FF).copy(alpha = 0.8f),
+                            start = androidx.compose.ui.geometry.Offset(0f, y),
+                            end = androidx.compose.ui.geometry.Offset(size.width, y),
+                            strokeWidth = 3.dp.toPx()
+                        )
+                    }
                 }
             }
 
