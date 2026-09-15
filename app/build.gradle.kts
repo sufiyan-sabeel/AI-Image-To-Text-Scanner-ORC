@@ -12,7 +12,7 @@ plugins {
 
 android {
   namespace = "com.example"
-  compileSdk { version = release(36) { minorApiLevel = 1 } }
+  compileSdk = 35
 
   defaultConfig {
     applicationId = "com.aistudio.aiscanner.xrtpwz"
@@ -37,8 +37,6 @@ android {
       storePassword = "android"
       keyAlias = "androiddebugkey"
       keyPassword = "android"
-      enableV1Signing = true
-      enableV2Signing = true
     }
   }
 

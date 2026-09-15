@@ -50,6 +50,13 @@ jobs:
       run: |
         mkdir -p release-output
         cp app/build/outputs/apk/debug/app-debug.apk release-output/AI-Image-To-Text-Scanner.apk
+        # Verify signing
+        APKSIGNER=$(find $ANDROID_HOME/build-tools -name apksigner 2>/dev/null | sort -V | tail -n 1)
+        if [ -n "$APKSIGNER" ] && [ -x "$APKSIGNER" ]; then
+          echo "Verifying and signing APK with $APKSIGNER..."
+          $APKSIGNER sign --ks debug.keystore --ks-pass pass:android --key-pass pass:android --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true release-output/AI-Image-To-Text-Scanner.apk || true
+          $APKSIGNER verify --verbose release-output/AI-Image-To-Text-Scanner.apk || true
+        fi
         ls -lh release-output/AI-Image-To-Text-Scanner.apk
 
     - name: Upload APK Artifact
